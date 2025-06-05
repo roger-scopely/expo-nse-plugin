@@ -1,17 +1,12 @@
-import fs from "fs";
-import path from "path";
-import { APP_GROUPS_KEY, NSE } from "./constants";
+import fs from 'fs';
+import path from 'path';
+import { APP_GROUPS_KEY, NSE } from './constants';
 
-const basePluginDirectory = require.resolve("expo-nse-plugin/package.json");
-const defaultFilesDirectory = path.join(basePluginDirectory, "../assets/nse/");
+const basePluginDirectory = require.resolve('expo-nse-plugin/package.json');
+const defaultFilesDirectory = path.join(basePluginDirectory, '../assets/nse/');
 
-export const copyHeaderFile = (
-  projectRoot: string,
-  bundleName: string,
-  hFilePath?: string
-) => {
-  const filePath =
-    hFilePath || path.join(defaultFilesDirectory, NSE.HEADER_FILE);
+export const copyHeaderFile = (projectRoot: string, bundleName: string, hFilePath?: string) => {
+  const filePath = hFilePath || path.join(defaultFilesDirectory, NSE.HEADER_FILE);
   return copyNseFile(projectRoot, bundleName, filePath);
 };
 
@@ -20,8 +15,7 @@ export const copyImplementationFile = (
   bundleName: string,
   mFilePath?: string
 ) => {
-  const filePath =
-    mFilePath || path.join(defaultFilesDirectory, NSE.IMPLEMENTATION_FILE);
+  const filePath = mFilePath || path.join(defaultFilesDirectory, NSE.IMPLEMENTATION_FILE);
   return copyNseFile(projectRoot, bundleName, filePath);
 };
 
@@ -31,18 +25,10 @@ export const generateInfoPlist = (
   version?: string,
   buildNumber?: string
 ) => {
-  const infoPlist = BASE_PLIST.replace(
-    "__CONTENT__",
-    getInfoPlistContent(version, buildNumber)
-  );
+  const infoPlist = BASE_PLIST.replace('__CONTENT__', getInfoPlistContent(version, buildNumber));
 
   fs.writeFileSync(
-    path.join(
-      projectRoot,
-      "ios",
-      bundleName,
-      `${bundleName}${NSE.PLIST_FILE_SUFFIX}`
-    ),
+    path.join(projectRoot, 'ios', bundleName, `${bundleName}${NSE.PLIST_FILE_SUFFIX}`),
     infoPlist
   );
 };
@@ -53,9 +39,9 @@ export const generateEntitlements = (
   appGroup: string | undefined
 ) => {
   const entitlements = BASE_PLIST.replace(
-    "__CONTENT__",
+    '__CONTENT__',
     !appGroup
-      ? ""
+      ? ''
       : `	<key>${APP_GROUPS_KEY}</key>
 	<array>
 		<string>${appGroup}</string>
@@ -63,7 +49,7 @@ export const generateEntitlements = (
   );
 
   fs.writeFileSync(
-    path.join(projectRoot, "ios", bundleName, `${bundleName}.entitlements`),
+    path.join(projectRoot, 'ios', bundleName, `${bundleName}.entitlements`),
     entitlements
   );
 };
@@ -74,7 +60,7 @@ const copyNseFile = (
   filePath: string,
   destinationFileName?: string
 ) => {
-  const bundleDestination = path.join(projectRoot, "ios", bundleName);
+  const bundleDestination = path.join(projectRoot, 'ios', bundleName);
   const _destinationFileName = destinationFileName || path.basename(filePath);
   fs.mkdirSync(bundleDestination, { recursive: true });
   fs.copyFileSync(filePath, path.join(bundleDestination, _destinationFileName));
@@ -105,4 +91,4 @@ const getInfoPlistContent = (version?: string, buildNumber?: string) => `  <key>
 	<key>CFBundleShortVersionString</key>
 	<string>${version}</string>
 	<key>CFBundleVersion</key>
-	<string>${buildNumber || "1"}</string>`;
+	<string>${buildNumber || '1'}</string>`;

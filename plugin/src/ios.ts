@@ -5,17 +5,17 @@ import {
   withInfoPlist,
   withXcodeProject,
   type ConfigPlugin,
-} from "@expo/config-plugins";
-import * as NseUtils from "./utils/nse";
-import * as XcodeUtils from "./utils/xcode";
-import { mergeContents } from "./utils/files";
+} from '@expo/config-plugins';
+import * as NseUtils from './utils/nse';
+import * as XcodeUtils from './utils/xcode';
+import { mergeContents } from './utils/files';
 import {
   APP_DELEGATE_ANCHORS,
   APP_GROUPS_KEY,
   BACKGROUND_MODES,
   PUSH_NOTIFICATIONS_ENTITLEMENT_KEY,
-} from "./utils/constants";
-import type { PluginProps } from "./utils/schema";
+} from './utils/constants';
+import type { PluginProps } from './utils/schema';
 
 const withNsePluginIos: ConfigPlugin<PluginProps> = (config, props) => {
   config = withPushNotificationsEntitlement(config, props);
@@ -30,10 +30,7 @@ const withNsePluginIos: ConfigPlugin<PluginProps> = (config, props) => {
 // This probably should not matter much, as following the Expo Notifications docs: "The iOS APNs entitlement is always set to 'development'. Xcode automatically changes this to 'production' during the archive."
 // https://docs.expo.dev/versions/latest/sdk/notifications/#configurable-properties
 // But still, they use it and expose it there, so we should probably do the same.
-const withPushNotificationsEntitlement: ConfigPlugin<PluginProps> = (
-  config,
-  { mode }
-) => {
+const withPushNotificationsEntitlement: ConfigPlugin<PluginProps> = (config, { mode }) => {
   return withEntitlementsPlist(config, (config) => {
     if (!config.modResults[PUSH_NOTIFICATIONS_ENTITLEMENT_KEY]) {
       config.modResults[PUSH_NOTIFICATIONS_ENTITLEMENT_KEY] = mode;
@@ -42,10 +39,7 @@ const withPushNotificationsEntitlement: ConfigPlugin<PluginProps> = (
   });
 };
 
-const withBackgroundModes: ConfigPlugin<PluginProps> = (
-  config,
-  { backgroundModes }
-) => {
+const withBackgroundModes: ConfigPlugin<PluginProps> = (config, { backgroundModes }) => {
   const { fetch, remoteNotifications } = backgroundModes;
   if (!fetch && !remoteNotifications) {
     return config;
@@ -57,18 +51,11 @@ const withBackgroundModes: ConfigPlugin<PluginProps> = (
     }
     if (
       remoteNotifications &&
-      !config.modResults.UIBackgroundModes.includes(
-        BACKGROUND_MODES.REMOTE_NOTIFICATION
-      )
+      !config.modResults.UIBackgroundModes.includes(BACKGROUND_MODES.REMOTE_NOTIFICATION)
     ) {
-      config.modResults.UIBackgroundModes.push(
-        BACKGROUND_MODES.REMOTE_NOTIFICATION
-      );
+      config.modResults.UIBackgroundModes.push(BACKGROUND_MODES.REMOTE_NOTIFICATION);
     }
-    if (
-      fetch &&
-      !config.modResults.UIBackgroundModes.includes(BACKGROUND_MODES.FETCH)
-    ) {
+    if (fetch && !config.modResults.UIBackgroundModes.includes(BACKGROUND_MODES.FETCH)) {
       config.modResults.UIBackgroundModes.push(BACKGROUND_MODES.FETCH);
     }
 
@@ -92,10 +79,7 @@ const withAppGroup: ConfigPlugin<PluginProps> = (config, { appGroup }) => {
   });
 };
 
-const withRemoteNotificationsDelegate: ConfigPlugin<PluginProps> = (
-  config,
-  { appDelegate }
-) => {
+const withRemoteNotificationsDelegate: ConfigPlugin<PluginProps> = (config, { appDelegate }) => {
   if (!appDelegate?.remoteNotificationsDelegate) return config;
   const { remoteNotificationsDelegate, imports } = appDelegate;
 
@@ -104,26 +88,26 @@ const withRemoteNotificationsDelegate: ConfigPlugin<PluginProps> = (
       const importArray = Array.isArray(imports) ? imports : [imports];
       const importString = importArray
         .filter((_import) => !config.modResults.contents.includes(_import))
-        .join("\n");
+        .join('\n');
 
       if (importString) {
         config.modResults.contents = mergeContents({
-          tag: "REMOTE_NOTIFICATIONS_DELEGATE_IMPORTS",
+          tag: 'REMOTE_NOTIFICATIONS_DELEGATE_IMPORTS',
           anchor: APP_DELEGATE_ANCHORS.IMPORTS,
           src: config.modResults.contents,
           newSrc: importString,
-          comment: "//",
+          comment: '//',
         });
       }
     }
 
     if (!config.modResults.contents.includes(remoteNotificationsDelegate)) {
       config.modResults.contents = mergeContents({
-        tag: "REMOTE_NOTIFICATIONS_DELEGATE_CODE",
+        tag: 'REMOTE_NOTIFICATIONS_DELEGATE_CODE',
         anchor: APP_DELEGATE_ANCHORS.REMOTE_NOTIFICATION_DELEGATE,
         src: config.modResults.contents,
         newSrc: remoteNotificationsDelegate,
-        comment: "//",
+        comment: '//',
       });
     }
 
@@ -131,29 +115,18 @@ const withRemoteNotificationsDelegate: ConfigPlugin<PluginProps> = (
   });
 };
 
-const withNseTarget: ConfigPlugin<PluginProps> = (
-  config,
-  { nse, appGroup }
-) => {
+const withNseTarget: ConfigPlugin<PluginProps> = (config, { nse, appGroup }) => {
   const { bundleName, hFilePath, mFilePath, frameworks, extraBuildSettings } = nse;
 
   const copiedFiles: string[] = [];
 
   config = withDangerousMod(config, [
-    "ios",
+    'ios',
     (config) => {
       const copyHeaderFile = (path: string | undefined) =>
-        NseUtils.copyHeaderFile(
-          config.modRequest.projectRoot,
-          bundleName,
-          path
-        );
+        NseUtils.copyHeaderFile(config.modRequest.projectRoot, bundleName, path);
       const copyImplementationFile = (path: string | undefined) =>
-        NseUtils.copyImplementationFile(
-          config.modRequest.projectRoot,
-          bundleName,
-          path
-        );
+        NseUtils.copyImplementationFile(config.modRequest.projectRoot, bundleName, path);
       const hFilePaths = Array.isArray(hFilePath) ? hFilePath : [hFilePath];
       const mFilePaths = Array.isArray(mFilePath) ? mFilePath : [mFilePath];
       copiedFiles.push(...hFilePaths.map(copyHeaderFile));
@@ -163,13 +136,9 @@ const withNseTarget: ConfigPlugin<PluginProps> = (
         config.modRequest.projectRoot,
         bundleName,
         config.version,
-        config.ios?.buildNumber,
+        config.ios?.buildNumber
       );
-      NseUtils.generateEntitlements(
-        config.modRequest.projectRoot,
-        bundleName,
-        appGroup
-      );
+      NseUtils.generateEntitlements(config.modRequest.projectRoot, bundleName, appGroup);
 
       return config;
     },
@@ -183,21 +152,21 @@ const withNseTarget: ConfigPlugin<PluginProps> = (
 
     const appBundleIdentifier = config.ios?.bundleIdentifier;
     if (!appBundleIdentifier) {
-      throw new Error(
-        "You must provide an `ios.bundleIdentifier` of your app in your app config."
-      );
+      throw new Error('You must provide an `ios.bundleIdentifier` of your app in your app config.');
     }
 
     const groupId = XcodeUtils.createPbxGroup(project, bundleName, copiedFiles);
     XcodeUtils.addGroupToMainProject(project, groupId);
 
-    const targetId = XcodeUtils.createTarget(
+    const targetId = XcodeUtils.createTarget(project, bundleName, appBundleIdentifier);
+    XcodeUtils.addBuildPhases(project, targetId, copiedFiles);
+    XcodeUtils.configureBuildSettings(
       project,
       bundleName,
-      appBundleIdentifier
+      config.name,
+      config.ios?.appleTeamId,
+      extraBuildSettings
     );
-    XcodeUtils.addBuildPhases(project, targetId, copiedFiles);
-    XcodeUtils.configureBuildSettings(project, bundleName, config.name, config.ios?.appleTeamId, extraBuildSettings);
     XcodeUtils.linkFrameworks(project, targetId, frameworks);
 
     return config;

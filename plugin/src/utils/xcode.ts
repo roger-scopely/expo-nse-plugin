@@ -2,15 +2,12 @@ import {
   ALWAYS_REQUIRE_FRAMEWORKS,
   DEFAULT_IPHONEOS_DEPLOYMENT_TARGET,
   DEFAULT_MARKETING_VERSION,
-  NSE, STATIC_BUILD_SETTINGS,
-} from "./constants";
-import type { XcodeProject } from "@expo/config-plugins";
+  NSE,
+  STATIC_BUILD_SETTINGS,
+} from './constants';
+import type { XcodeProject } from '@expo/config-plugins';
 
-export const createPbxGroup = (
-  project: XcodeProject,
-  bundleName: string,
-  sources: string[]
-) => {
+export const createPbxGroup = (project: XcodeProject, bundleName: string, sources: string[]) => {
   const filePathsArray = [
     ...sources,
     `${bundleName}${NSE.PLIST_FILE_SUFFIX}`,
@@ -22,14 +19,11 @@ export const createPbxGroup = (
   return uuid as string;
 };
 
-export const addGroupToMainProject = (
-  project: XcodeProject,
-  groupId: string
-) => {
+export const addGroupToMainProject = (project: XcodeProject, groupId: string) => {
   const pbxGroups = project.hash.project.objects.PBXGroup;
 
   const groupEntry = Object.entries<PbxGroup>(pbxGroups).find(
-    ([key, group]) => !group?.name && !group?.path && !key.endsWith("_comment")
+    ([key, group]) => !group?.name && !group?.path && !key.endsWith('_comment')
   );
 
   if (groupEntry) {
@@ -54,14 +48,10 @@ export const createTarget = (
   return uuid as string;
 };
 
-export const addBuildPhases = (
-  project: XcodeProject,
-  targetId: string,
-  sources: string[]
-) => {
-  project.addBuildPhase(sources, "PBXSourcesBuildPhase", "Sources", targetId);
-  project.addBuildPhase([], "PBXFrameworksBuildPhase", "Frameworks", targetId);
-  project.addBuildPhase([], "PBXResourcesBuildPhase", "Resources", targetId);
+export const addBuildPhases = (project: XcodeProject, targetId: string, sources: string[]) => {
+  project.addBuildPhase(sources, 'PBXSourcesBuildPhase', 'Sources', targetId);
+  project.addBuildPhase([], 'PBXFrameworksBuildPhase', 'Frameworks', targetId);
+  project.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', targetId);
 };
 
 export const configureBuildSettings = (
@@ -69,22 +59,16 @@ export const configureBuildSettings = (
   bundleName: string,
   appName: string,
   developmentTeam?: string,
-  extraBuildSettings?: object,
+  extraBuildSettings?: object
 ) => {
   // target name is the app name without spaces
-  const appTargetName = appName.replaceAll(" ", "");
+  const appTargetName = appName.replaceAll(' ', '');
   const configurations = project.pbxXCBuildConfigurationSection();
 
-  const { app, nse } = findConfigurations(
-    configurations,
-    appTargetName,
-    bundleName
-  );
+  const { app, nse } = findConfigurations(configurations, appTargetName, bundleName);
 
   if (!nse.Debug || !nse.Release) {
-    throw new Error(
-      `Could not find the configurations for the target ${bundleName}`
-    );
+    throw new Error(`Could not find the configurations for the target ${bundleName}`);
   }
 
   const debugIphoneOsDeploymentTarget =
@@ -112,7 +96,6 @@ export const configureBuildSettings = (
     CODE_SIGN_ENTITLEMENTS: `${bundleName}/${bundleName}.entitlements`,
     IPHONEOS_DEPLOYMENT_TARGET: debugIphoneOsDeploymentTarget,
     MARKETING_VERSION: debugMarketingVersion,
-
   };
 
   nse.Release.buildSettings = {
@@ -130,16 +113,12 @@ export const configureBuildSettings = (
   }
 };
 
-export const linkFrameworks = (
-  project: XcodeProject,
-  targetId: string,
-  frameworks?: string[]
-) => {
-  const frameworksSet = new Set([...ALWAYS_REQUIRE_FRAMEWORKS, ...(frameworks ?? [])])
+export const linkFrameworks = (project: XcodeProject, targetId: string, frameworks?: string[]) => {
+  const frameworksSet = new Set([...ALWAYS_REQUIRE_FRAMEWORKS, ...(frameworks ?? [])]);
   for (const framework of frameworksSet) {
     project.addFramework(framework, { target: targetId, embed: false, link: true, sign: false });
   }
-}
+};
 
 const ensurePbxObjects = (project: XcodeProject) => {
   // Fixing the bug in the dependency package.
@@ -164,21 +143,14 @@ const findConfigurations = (
   };
 
   for (const key in configurations) {
-    if (
-      configurations[key].buildSettings?.PRODUCT_NAME === `"${appTargetName}"`
-    ) {
+    if (configurations[key].buildSettings?.PRODUCT_NAME === `"${appTargetName}"`) {
       cfgs.app[configurations[key].name] = configurations[key];
     }
     if (configurations[key].buildSettings?.PRODUCT_NAME === `"${bundleName}"`) {
       cfgs.nse[configurations[key].name] = configurations[key];
     }
 
-    if (
-      cfgs.app.Debug &&
-      cfgs.app.Release &&
-      cfgs.nse.Debug &&
-      cfgs.nse.Release
-    ) {
+    if (cfgs.app.Debug && cfgs.app.Release && cfgs.nse.Debug && cfgs.nse.Release) {
       break;
     }
   }
@@ -188,7 +160,7 @@ const findConfigurations = (
 
 type Configuration = {
   buildSettings?: Record<string, string>;
-  name: "Debug" | "Release";
+  name: 'Debug' | 'Release';
 };
 
 type ConfigurationGroups = {
