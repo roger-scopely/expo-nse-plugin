@@ -13,3 +13,7 @@ __rsc_tests__
 /babel.config.js
 /android/src/androidTest/
 /android/src/test/
+
+# Exclude linting and formatting files
+.eslintrc.js
+.prettierrc
