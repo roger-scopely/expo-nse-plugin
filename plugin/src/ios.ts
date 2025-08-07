@@ -1,10 +1,10 @@
 import {
+  type ConfigPlugin,
   withAppDelegate,
   withDangerousMod,
   withEntitlementsPlist,
   withInfoPlist,
   withXcodeProject,
-  type ConfigPlugin,
 } from '@expo/config-plugins';
 import * as NseUtils from './utils/nse';
 import * as XcodeUtils from './utils/xcode';
@@ -21,6 +21,7 @@ const withNsePluginIos: ConfigPlugin<PluginProps> = (config, props) => {
   config = withPushNotificationsEntitlement(config, props);
   config = withBackgroundModes(config, props);
   config = withAppGroup(config, props);
+  config = withIntents(config, props);
   config = withRemoteNotificationsDelegate(config, props);
   config = withNseTarget(config, props);
 
@@ -71,8 +72,28 @@ const withAppGroup: ConfigPlugin<PluginProps> = (config, { appGroup }) => {
       config.modResults[APP_GROUPS_KEY] = [];
     }
 
-    if (!config.modResults[APP_GROUPS_KEY].includes(appGroup)) {
-      config.modResults[APP_GROUPS_KEY].push(appGroup);
+    for (const a of appGroup) {
+      if (!config.modResults[APP_GROUPS_KEY].includes(a)) {
+        config.modResults[APP_GROUPS_KEY].push(a);
+      }
+    }
+
+    return config;
+  });
+};
+
+const withIntents: ConfigPlugin<PluginProps> = (config, { intents }) => {
+  if (!intents) return config;
+
+  return withInfoPlist(config, (config) => {
+    if (!Array.isArray(config.modResults.NSUserActivityTypes)) {
+      config.modResults.NSUserActivityTypes = [];
+    }
+
+    for (const intent of intents) {
+      if (!config.modResults.NSUserActivityTypes.includes(intent)) {
+        config.modResults.NSUserActivityTypes.push(intent);
+      }
     }
 
     return config;
@@ -85,8 +106,7 @@ const withRemoteNotificationsDelegate: ConfigPlugin<PluginProps> = (config, { ap
 
   return withAppDelegate(config, (config) => {
     if (imports) {
-      const importArray = Array.isArray(imports) ? imports : [imports];
-      const importString = importArray
+      const importString = imports
         .filter((_import) => !config.modResults.contents.includes(_import))
         .join('\n');
 
@@ -127,8 +147,8 @@ const withNseTarget: ConfigPlugin<PluginProps> = (config, { nse, appGroup }) => 
         NseUtils.copyHeaderFile(config.modRequest.projectRoot, bundleName, path);
       const copyImplementationFile = (path: string | undefined) =>
         NseUtils.copyImplementationFile(config.modRequest.projectRoot, bundleName, path);
-      const hFilePaths = Array.isArray(hFilePath) ? hFilePath : [hFilePath];
-      const mFilePaths = Array.isArray(mFilePath) ? mFilePath : [mFilePath];
+      const hFilePaths = hFilePath ?? [undefined];
+      const mFilePaths = mFilePath ?? [undefined];
       copiedFiles.push(...hFilePaths.map(copyHeaderFile));
       copiedFiles.push(...mFilePaths.map(copyImplementationFile));
 
