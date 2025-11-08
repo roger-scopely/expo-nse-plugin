@@ -102,8 +102,8 @@ All the options of the plugin configurable from the `app.json` / `app.config.js`
 | `nse.sourceFiles`                         | `string \| string[]`            | No           | Default Xcode's NSE content      | Path to custom source files (.swift, .m, .h) for the Notification Service Extension. Automatically enables Swift build settings when Swift files are present. |
 | `nse.bundleName`                          | `string`                        | No           | `"NotificationServiceExtension"` | The name of your Notification Service Extension target                                                                                                        |
 | `nse.frameworks`                          | `string[]`                      | No           | None                             | Additional iOS Frameworks to link with the Notification Service Extension (UserNotifications.framework always included)                                       |
-| `nse.extraBuildSettings`                  | `object`                        | No           | None                             | Additional keys/values to add to the Notification Service Extension's build settings                                                                          |
-| `nse.extraInfoPlist`                      | `object`                        | No           | None                             | Additional keys/values to add to the Notification Service Extension's Info.plist (not the main app's Info.plist)                                              |
+| `nse.extraBuildSettings`                  | `object`                        | No           | None                             | Additional string keys/values to add to the Notification Service Extension's build settings                                                                   |
+| `nse.extraInfoPlist`                      | `object`                        | No           | None                             | Additional string keys/values to add to the Notification Service Extension's Info.plist (not the main app's Info.plist)                                       |
 
 # Contributing & testing
 
