@@ -33,7 +33,7 @@ export const generateInfoPlist = (
   let content = getInfoPlistContent(version, buildNumber);
   for (const [key, value] of Object.entries(extraInfoPlist)) {
     content += `
-  <key>${key}</key>
+	<key>${key}</key>
 	<string>${value}</string>`;
   }
 
